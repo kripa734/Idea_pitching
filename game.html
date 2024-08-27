@@ -4,8 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Interactive Game - Fusion Energy</title>
-    <link rel="stylesheet" href="styles.css">
+    <title>Fusion Energy Simulator</title>
     <style>
         body {
             margin: 0;
@@ -14,6 +13,8 @@
             color: #e0e0e0;
             display: flex;
             flex-direction: column;
+            align-items: center;
+            justify-content: center;
             min-height: 100vh;
         }
 
@@ -21,6 +22,7 @@
             background-color: rgba(0, 150, 136, 0.9);
             padding: 20px;
             text-align: center;
+            width: 100%;
             box-shadow: 0px 2px 10px rgba(0, 0, 0, 0.2);
         }
 
@@ -29,48 +31,17 @@
             color: #ffffff;
             font-size: 2.5em;
             text-shadow: 2px 2px #004d40;
-            animation: fadeIn 2s ease-in-out;
-        }
-
-        nav ul {
-            list-style-type: none;
-            padding: 0;
-        }
-
-        nav ul li {
-            display: inline;
-            margin: 0 15px;
-        }
-
-        nav ul li a {
-            color: #ffffff;
-            text-decoration: none;
-            font-weight: bold;
-            transition: color 0.3s ease;
-        }
-
-        nav ul li a:hover {
-            color: #4caf50;
         }
 
         section#game {
-            flex-grow: 1;
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center;
-            padding: 40px;
             text-align: center;
+            padding: 20px;
             background: rgba(0, 0, 0, 0.5);
             border-radius: 10px;
-            margin: 20px;
             box-shadow: 0px 0px 15px rgba(0, 150, 136, 0.7);
-            animation: pulse 3s infinite;
-            transition: transform 0.3s ease-in-out;
-        }
-
-        section#game:hover {
-            transform: scale(1.05);
         }
 
         section#game h2 {
@@ -78,32 +49,69 @@
             font-size: 2em;
             margin-bottom: 20px;
             text-shadow: 1px 1px #004d40;
-            animation: glow 2s infinite alternate;
         }
 
-        section#game p {
-            font-size: 1.2em;
-            margin-bottom: 30px;
+        .slider-container {
+            margin: 15px 0;
+            width: 80%;
+            max-width: 400px;
+            text-align: left;
         }
 
-        label {
-            font-size: 1.1em;
-            margin-bottom: 10px;
+        .slider-container label {
             display: block;
-            color: #ffffff;
-            animation: fadeInUp 1s ease-in-out;
+            font-size: 1.1em;
+            margin-bottom: 5px;
         }
 
-        input[type="number"],
-        select {
-            padding: 10px;
-            font-size: 1.1em;
-            margin-bottom: 20px;
-            border: none;
-            border-radius: 5px;
-            width: 60%;
-            max-width: 300px;
-            animation: fadeInUp 1.5s ease-in-out;
+        .slider-container input[type="range"] {
+            width: 100%;
+        }
+
+        .fusion-container {
+            position: relative;
+            width: 300px;
+            height: 300px;
+            margin: 20px 0;
+        }
+
+        .atom {
+            position: absolute;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background-color: #4caf50;
+            top: 50%;
+            transform: translateY(-50%);
+            transition: all 2s ease;
+        }
+
+        .atom.left {
+            left: 0;
+        }
+
+        .atom.right {
+            right: 0;
+        }
+
+        .fusion-result {
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            opacity: 0;
+            font-size: 2em;
+            color: #ff5722;
+            transition: opacity 1s ease, transform 1s ease;
+        }
+
+        .fusion-result.bang {
+            transform: translate(-50%, -50%) scale(3);
+            opacity: 1;
+        }
+
+        .fusion-result.fade {
+            opacity: 0;
         }
 
         button {
@@ -115,7 +123,6 @@
             border-radius: 5px;
             cursor: pointer;
             transition: background-color 0.3s ease, transform 0.3s ease;
-            animation: fadeInUp 2s ease-in-out;
             box-shadow: 0 0 15px rgba(0, 191, 165, 0.5);
         }
 
@@ -130,107 +137,114 @@
             padding: 10px;
             text-align: center;
             color: #ffffff;
+            width: 100%;
             box-shadow: 0px -2px 10px rgba(0, 0, 0, 0.2);
-            animation: fadeIn 2s ease-in-out;
-        }
-
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-            }
-
-            to {
-                opacity: 1;
-            }
-        }
-
-        @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        @keyframes glow {
-            from {
-                text-shadow: 1px 1px #004d40, 0 0 20px #4caf50, 0 0 30px #4caf50, 0 0 40px #4caf50;
-            }
-
-            to {
-                text-shadow: 2px 2px #004d40, 0 0 30px #4caf50, 0 0 40px #4caf50, 0 0 50px #4caf50;
-            }
-        }
-
-        @keyframes pulse {
-            0% {
-                transform: scale(1);
-            }
-
-            50% {
-                transform: scale(1.02);
-            }
-
-            100% {
-                transform: scale(1);
-            }
         }
     </style>
-    <script>
-        function startFusion() {
-            let temperature = document.getElementById("temperature").value;
-            let pressure = document.getElementById("pressure").value;
-            let fuel = document.getElementById("fuel").value;
-
-            if (temperature >= 10000000 && pressure >= 50 && fuel === "deuterium") {
-                alert("Fusion Achieved! You've created a sustainable reaction.");
-            } else {
-                alert("Conditions not met. Adjust the parameters and try again.");
-            }
-        }
-    </script>
 </head>
 
 <body>
     <header>
-        <h1>Fusion Energy Game</h1>
-        <nav>
-            <ul>
-                <li><a href="index.html">Home</a></li>
-                <li><a href="resources.html">Educational Resources</a></li>
-                <li><a href="external.html">External Resources</a></li>
-                <li><a href="game.html">Interactive Game</a></li>
-                <li><a href="contact.html">Contact</a></li>
-            </ul>
-        </nav>
+        <h1>Fusion Energy Simulator</h1>
     </header>
 
     <section id="game">
         <h2>Simulate Fusion</h2>
-        <p>Adjust the parameters to simulate the conditions needed for nuclear fusion.</p>
-        <label for="temperature">Temperature (in °C):</label>
-        <input type="number" id="temperature" name="temperature" min="0" placeholder="e.g., 10,000,000">
-        <br>
-        <label for="pressure">Pressure (in atm):</label>
-        <input type="number" id="pressure" name="pressure" min="0" placeholder="e.g., 50">
-        <br>
-        <label for="fuel">Select Fuel Type:</label>
-        <select id="fuel" name="fuel">
-            <option value="deuterium">Deuterium</option>
-            <option value="tritium">Tritium</option>
-            <option value="hydrogen">Hydrogen</option>
-        </select>
-        <br>
+
+        <!-- Slider for Temperature -->
+        <div class="slider-container">
+            <label for="temperature">Temperature (in °C): <span id="temp-value">10,000,000</span></label>
+            <input type="range" id="temperature" name="temperature" min="0" max="15000000" value="10000000">
+        </div>
+
+        <!-- Slider for Pressure -->
+        <div class="slider-container">
+            <label for="pressure">Pressure (in atm): <span id="pressure-value">50</span></label>
+            <input type="range" id="pressure" name="pressure" min="0" max="100" value="50">
+        </div>
+
+        <!-- Fuel Selection -->
+        <div class="slider-container">
+            <label for="fuel">Select Fuel Type:</label>
+            <select id="fuel" name="fuel">
+                <option value="deuterium">Deuterium</option>
+                <option value="tritium">Tritium</option>
+                <option value="hydrogen">Hydrogen</option>
+            </select>
+        </div>
+
         <button onclick="startFusion()">Start Fusion</button>
+
+        <!-- Fusion Animation Container -->
+        <div class="fusion-container">
+            <img src="deuterium.png" alt="Deuterium Atom" class="atom left" id="left-atom">
+            <img src="deuterium.png" alt="Deuterium Atom" class="atom right" id="right-atom">
+            <div class="fusion-result" id="fusion-result"></div>
+        </div>
     </section>
 
     <footer>
         <p>&copy; 2024 Fusion Energy Educational Platform</p>
     </footer>
-</body>
 
-</html>
+    <script>
+        // Update slider values dynamically
+        document.getElementById('temperature').addEventListener('input', function() {
+            document.getElementById('temp-value').textContent = this.value.toLocaleString();
+        });
+
+        document.getElementById('pressure').addEventListener('input', function() {
+            document.getElementById('pressure-value').textContent = this.value;
+        });
+
+        function startFusion() {
+            let temperature = document.getElementById("temperature").value;
+            let pressure = document.getElementById("pressure").value;
+            let fuel = document.getElementById("fuel").value;
+
+            const leftAtom = document.getElementById('left-atom');
+            const rightAtom = document.getElementById('right-atom');
+            const resultText = document.getElementById('fusion-result');
+
+            // Reset positions and result
+            leftAtom.style.left = '0';
+            rightAtom.style.right = '0';
+            resultText.classList.remove('bang', 'fade');
+            resultText.style.opacity = '0';
+            resultText.textContent = '';
+
+            // Change atom images based on fuel type
+            let atomImage;
+            if (fuel === 'deuterium') {
+                atomImage = 'deuterium.png';
+            } else if (fuel === 'tritium') {
+                atomImage = 'tritium.png';
+            } else {
+                atomImage = 'hydrogen.png';
+            }
+            leftAtom.src = atomImage;
+            rightAtom.src = atomImage;
+
+            // Animate atoms moving together
+            setTimeout(() => {
+                leftAtom.style.left = 'calc(50% - 25px)';
+                rightAtom.style.right = 'calc(50% - 25px)';
+            }, 100);
+
+            // Determine result after atoms collide
+            setTimeout(() => {
+                if (temperature >= 10000000 && pressure >= 50 && fuel === "deuterium") {
+                    resultText.textContent = "Helium Produced!";
+                    resultText.classList.add('bang');
+                    // Change atom images to helium and add energy effect
+                    leftAtom.src = 'helium.png';
+                    rightAtom.src = '';
+                    resultText.innerHTML = '<img src="energy.png" alt="Energy" style="width:50px;height:50px;">';
+                } else {
+                    resultText.textContent = "Failed";
+                    resultText.classList.add('fade');
+                }
+            }, 2100);
+        }
+    </script>
+</body
